@@ -3,27 +3,27 @@ from dotenv import load_dotenv
 from flask import Flask, request, abort
 from linebot.v3.webhook import WebhookHandler, Event
 from linebot.v3.exceptions import InvalidSignatureError
-from linebot.v3.messaging import (
-    ApiClient,
-    Configuration,
-    MessagingApi,
-    TextMessage,
-    ImageMessage,
-    FileMessage,
-    MessageEvent,
-    TextSendMessage,
-    ImageSendMessage
+# from linebot.v3.messaging import (
+#    ApiClient,
+#    Configuration,
+#    MessagingApi,
+#    TextMessage,
+#    ImageMessage,
+#    FileMessage,
+#    MessageEvent,
+#    TextSendMessage,
+#    ImageSendMessage
 )
 
-#from linebot.v3.messaging.models import TextMessage
-# from linebot import LineBotApi, WebhookHandler
-# from linebot.models import (
-#    MessageEvent, 
-#    TextMessage, 
-#    ImageMessage,    # Sidney新增：圖片訊息事件模型
-#    FileMessage,     # Sidney新增：檔案訊息事件模型
-#    TextSendMessage,
-#    ImageSendMessage)
+from linebot.v3.messaging.models import TextMessage
+from linebot import LineBotApi, WebhookHandler
+from linebot.models import ( 
+    MessageEvent, 
+    TextMessage, 
+    ImageMessage,    # Sidney新增：圖片訊息事件模型
+    FileMessage,     # Sidney新增：檔案訊息事件模型
+    TextSendMessage,
+    ImageSendMessage)
 
 import logging
 
