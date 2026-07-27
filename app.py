@@ -85,8 +85,8 @@ def handle_image_message(event):
 
 
     message_id = event.message.id
-    # file_name  = event.message.file_name  # 檔案名稱 ==> 'ImageMessage' object has no attribute 'file_name'
-    file_size  = event.message.file_size  # 檔案大小 (Bytes)
+    # file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
+    # file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
     app.logger.info(f"收到圖片： ({file_size} bytes), Message ID: {message_id}")
 
     # 回覆使用者收到圖片
