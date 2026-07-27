@@ -67,7 +67,12 @@ def get_source_info(event):
     user_id  = getattr(event.source, 'user_id', None)
     group_id = getattr(event.source, 'group_id', None)
     room_id  = getattr(event.source, 'room_id', None)
-    return user_id, group_id
+    return user_id, group_id, room_id
+
+app.logger.info(f"user_id: {user_id}")
+app.logger.info(f"group_id: {group_id}")
+app.logger.info(f"room_id: {room_id}")
+
 
 
 # 1. 設置一個事件處理器來處理 TextMessageContent 事件
