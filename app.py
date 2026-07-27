@@ -83,7 +83,7 @@ def handle_text_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     user_message = event.message.text  # 使用者的訊息
     app.logger.info(f"收到的訊息type: {user_message_type}")
-    app.logger.info(f"收到的訊息: {user_message}")
+    app.logger.info(f"收到的文字訊息(v3): {user_message}")
 
     # 使用 GPT 生成回應
     # reply_text = ("LINEBot Test收到：" + user_message)
@@ -103,8 +103,6 @@ def handle_text_message(event):
                 messages=[TextMessage(text=reply_text)]
             )
         )
-
-
         
 # 2. 處理圖片訊息
 ## @handler.add(MessageEvent, message=ImageMessage)
@@ -121,7 +119,7 @@ def handle_image_message(event):
     # file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
 
     # 回覆使用者收到圖片
-    reply_text = f"收到你的圖片囉！(Message ID: {message_id})"
+    reply_text = f"收到的圖片訊息(v3)！(Message ID: {message_id})"
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
