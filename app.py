@@ -70,12 +70,13 @@ def handle_text_message(event):
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息
     app.logger.info(f"收到的訊息type: {user_message_type}")
-    app.logger.info(f"收到的文字訊息: {user_message}")
+    app.logger.info(f"收到的訊息id: {message_id}")
+    app.logger.info(f"收到文字: {user_message}")
 
     # 生成回應
     reply_text = f"LINEBot 收到文字(v3)：{user_message}"
     
-    # v3 回覆訊息的新寫法
+    # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message(
@@ -92,22 +93,21 @@ def handle_image_message(event):
     
     # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
-    message_id = event.message.id
-    app.logger.info(f"收到的訊息type: {user_message_type}")
-    
-    
-    app.logger.info(f"收到圖片：  Message ID: {message_id}")
-    file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
+    message_id = event.message.id          # 使用者的訊息ID
+    ## file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
     file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
+    app.logger.info(f"收到的訊息type: {user_message_type}")
+    app.logger.info(f"收到的訊息id: {message_id}") 
+    app.logger.info(f"收到圖片")
 
     # 回覆使用者收到圖片
-    reply_text = f"LINEBot 收到圖片(v3)\n(Message ID: {message_id})"
+    reply_text = f"LINEBot 收到圖片(v3)\nMessage ID: {message_id}"
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
     ## )
 
-    # v3 回覆訊息的新寫法
+    # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message(
@@ -126,17 +126,16 @@ def handle_file_message(event):
     
     # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
+    message_id = event.message.id          # 使用者的訊息ID    
+    file_name  = event.message.file_name   # 檔案名稱
+    file_size  = event.message.file_size   # 檔案大小 (Bytes)
     app.logger.info(f"收到的訊息type: {user_message_type}")
-    
-    message_id = event.message.id
-    file_name  = event.message.file_name  # 檔案名稱
-    file_size  = event.message.file_size  # 檔案大小 (Bytes)
-    
-    app.logger.info(f"收到檔案訊息(v3): {file_name} ({file_size} bytes), Message ID: {message_id}")
+    app.logger.info(f"收到的訊息id: {message_id}") 
+    app.logger.info(f"收到檔案(v3): {file_name} ({file_size} bytes)")
 
     # 回覆使用者收到檔案
-    reply_text = f"LINEBot 收到檔案(V3)\n檔名：{file_name}\n大小：{file_size} bytes"
-   
+    reply_text = f"LINEBot 收到檔案(V3)\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
+    
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
