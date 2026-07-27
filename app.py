@@ -62,6 +62,13 @@ def callback():
 
     return 'OK'
 
+# Helper 函式：用來安全取得 User ID 和 Group ID(群組ID) 和Room ID(多人聊天室ID)
+def get_source_info(event):
+    user_id  = getattr(event.source, 'user_id', None)
+    group_id = getattr(event.source, 'group_id', None)
+    room_id  = getattr(event.source, 'room_id', None)
+    return user_id, group_id
+
 
 # 1. 設置一個事件處理器來處理 TextMessageContent 事件
 @handler.add(MessageEvent, message=TextMessageContent)
@@ -75,7 +82,12 @@ def handle_text_message(event):
     app.logger.info(f"收到文字: {user_message}")
 
     # 生成回應
-    reply_text = f"LINEBot 收到文字\nMessage ID: {message_id}\n內容: {user_message}"
+    reply_text = f"LINEBot 收到文字\n
+                   User ID: {user_id}\n
+                   Group ID: {group_id}\n
+                   Room ID: {room_id}\n
+                   Message ID: {message_id}\n
+                   內容: {user_message}"
     
     # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
