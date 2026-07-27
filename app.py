@@ -55,6 +55,7 @@ def callback():
 
     return 'OK'
 
+
 # 1. 設置一個事件處理器來處理 TextMessage 事件
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: Event):
@@ -115,22 +116,7 @@ def handle_file_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_text)
-    )# 3. 修改：處理檔案訊息 (FileMessage)
-@handler.add(MessageEvent, message=FileMessage)
-def handle_file_message(event):
-    message_id = event.message.id
-    file_name = event.message.file_name  # 檔案名稱
-    file_size = event.message.file_size  # 檔案大小 (Bytes)
-    
-    app.logger.info(f"收到檔案訊息: {file_name} ({file_size} bytes), Message ID: {message_id}")
-
-    # 回覆使用者收到檔案
-    reply_text = f"收到檔案囉！\n檔名：{file_name}\n大小：{file_size} bytes"
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply_text)
     )
-
 
         
 # 應用程序入口點
