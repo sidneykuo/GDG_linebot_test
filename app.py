@@ -94,8 +94,10 @@ def handle_image_message(event):
     # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
+    ##
     ## file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
-    file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
+    ## file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
+    ##
     app.logger.info(f"收到的訊息type: {user_message_type}")
     app.logger.info(f"收到的訊息id: {message_id}") 
     app.logger.info(f"收到圖片")
