@@ -83,11 +83,11 @@ def handle_text_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     user_message = event.message.text  # 使用者的訊息
     app.logger.info(f"收到的訊息type: {user_message_type}")
-    app.logger.info(f"收到的文字訊息(v3): {user_message}")
+    app.logger.info(f"收到的文字訊息: {user_message}")
 
-    # 使用 GPT 生成回應
+    # 生成回應
     # reply_text = ("LINEBot Test收到：" + user_message)
-    reply_text = f"LINEBot Test收到：{user_message}"
+    reply_text = f"LINEBot Test收到(v3)：{user_message}"
     
     ## line_bot_api.reply_message(
     ##     event.reply_token,
@@ -137,27 +137,38 @@ def handle_image_message(event):
 
 
 # 3. 處理檔案訊息 (FileMessage)
-@handler.add(MessageEvent, message=FileMessage)
+## @handler.add(MessageEvent, message=FileMessage)
+@handler.add(MessageEvent, message=FileMessageContent)
+
 def handle_file_message(event):
     
     # 印出message.type
-    user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
+    user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
     app.logger.info(f"收到的訊息type: {user_message_type}")
     
     message_id = event.message.id
     file_name  = event.message.file_name  # 檔案名稱
     file_size  = event.message.file_size  # 檔案大小 (Bytes)
     
-    app.logger.info(f"收到檔案訊息: {file_name} ({file_size} bytes), Message ID: {message_id}")
+    app.logger.info(f"收到檔案訊息(v3): {file_name} ({file_size} bytes), Message ID: {message_id}")
 
     # 回覆使用者收到檔案
     reply_text = f"收到檔案！\n檔名：{file_name}\n大小：{file_size} bytes"
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply_text)
-    )
+   
+    ## line_bot_api.reply_message(
+    ##     event.reply_token,
+    ##     TextSendMessage(text=reply_text)
+    ## )
+    
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=reply_text)]
+            )
+        )
 
-        
 # 應用程序入口點
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
