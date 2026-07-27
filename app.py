@@ -60,12 +60,12 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: Event):
 
-    # 2026/7/27 新增by Sidney，想查看message.type
+    # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
     app.logger.info(f"收到的訊息type: {user_message_type}")
 
-        user_message = event.message.text  # 使用者的訊息
-        app.logger.info(f"收到的訊息: {user_message}")
+    user_message = event.message.text  # 使用者的訊息
+    app.logger.info(f"收到的訊息: {user_message}")
 
     ## 使用 GPT 生成回應
     reply_text = ("LINEBot Test收到：" + user_message)
@@ -79,7 +79,7 @@ def handle_message(event: Event):
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
     
-    # 2026/7/27 新增by Sidney，想查看message.type
+    # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
     app.logger.info(f"收到的訊息type: {user_message_type}")
 
@@ -99,10 +99,9 @@ def handle_image_message(event):
 @handler.add(MessageEvent, message=FileMessage)
 def handle_file_message(event):
     
-    # 2026/7/27 新增by Sidney，想查看message.type
+    # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
     app.logger.info(f"收到的訊息type: {user_message_type}")
-    
     
     message_id = event.message.id
     file_name = event.message.file_name  # 檔案名稱
