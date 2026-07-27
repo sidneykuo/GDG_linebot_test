@@ -1,31 +1,38 @@
 import os
+import logging
 from dotenv import load_dotenv
 from flask import Flask, request, abort
-from linebot.v3.webhook import WebhookHandler, Event
+
+# 引入 LINE SDK v3 的模組
+from linebot.v3.webhook import WebhookHandler
 from linebot.v3.exceptions import InvalidSignatureError
-# from linebot.v3.messaging import (
-#    ApiClient,
-#    Configuration,
-#    MessagingApi,
-#    TextMessage,
-#    ImageMessage,
-#    FileMessage,
-#    MessageEvent,
+from linebot.v3.messaging import (
+    Configuration,
+    ApiClient,
+    MessagingApi,
+    ReplyMessageRequest,
+    TextMessage
+)
+from linebot.v3.webhooks import (
+    MessageEvent,
+    TextMessageContent,
+    ImageMessageContent,
+    FileMessageContent
+)
+
+
+#from linebot.v3.webhook import WebhookHandler, Event
+#from linebot.v3.exceptions import InvalidSignatureError
+#from linebot.v3.messaging.models import TextMessage
+#from linebot import LineBotApi, WebhookHandler
+#from linebot.models import ( 
+#    MessageEvent, 
+#    TextMessage, 
+#    ImageMessage,    # Sidney新增：圖片訊息事件模型
+#    FileMessage,     # Sidney新增：檔案訊息事件模型
 #    TextSendMessage,
-#    ImageSendMessage
-#)
+#    ImageSendMessage)
 
-from linebot.v3.messaging.models import TextMessage
-from linebot import LineBotApi, WebhookHandler
-from linebot.models import ( 
-    MessageEvent, 
-    TextMessage, 
-    ImageMessage,    # Sidney新增：圖片訊息事件模型
-    FileMessage,     # Sidney新增：檔案訊息事件模型
-    TextSendMessage,
-    ImageSendMessage)
-
-import logging
 
 # 加載 .env 文件中的變數
 load_dotenv()
@@ -41,12 +48,13 @@ if not line_token or not line_secret:
     raise ValueError("LINE_TOKEN 或 LINE_SECRET 未設置")
 
 # 初始化 LineBotApi 和 WebhookHandler
-line_bot_api = LineBotApi(line_token)
+## line_bot_api = LineBotApi(line_token)
+## handler = WebhookHandler(line_secret)
+configuration = Configuration(access_token=line_token)
 handler = WebhookHandler(line_secret)
 
 # 創建 Flask 應用
 app = Flask(__name__)
-
 app.logger.setLevel(logging.DEBUG)
 
 # 設置一個路由來處理 LINE Webhook 的回調請求
@@ -69,22 +77,33 @@ def callback():
 
 
 # 1. 設置一個事件處理器來處理 TextMessage 事件
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event: Event):
-
-    # 印出message.type
-    user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
-    app.logger.info(f"收到的訊息type: {user_message_type}")
-
+## @handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=TextMessageContent)
+def handle_text_message(event):
+    user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     user_message = event.message.text  # 使用者的訊息
+    app.logger.info(f"收到的訊息type: {user_message_type}")
     app.logger.info(f"收到的訊息: {user_message}")
 
-    ## 使用 GPT 生成回應
-    reply_text = ("LINEBot Test收到：" + user_message)
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply_text)
-    )
+    # 使用 GPT 生成回應
+    # reply_text = ("LINEBot Test收到：" + user_message)
+    reply_text = f"LINEBot Test收到：{user_message}"
+    
+    ## line_bot_api.reply_message(
+    ##     event.reply_token,
+    ##    TextSendMessage(text=reply_text)
+    ##)
+
+    # v3 回覆訊息的新寫法
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=reply_text)]
+            )
+        )
+
 
         
 # 2. 處理圖片訊息
