@@ -57,7 +57,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: Event):
 
-    -- 2026/7/27 新增by Sidney，想查看message.type
+    # 2026/7/27 新增by Sidney，想查看message.type
     app.logger.info(f"收到的message type: {event.message.type}")
     
     if event.message.type == "text":
