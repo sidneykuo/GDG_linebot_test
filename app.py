@@ -107,8 +107,8 @@ def handle_image_message(event):
     app.logger.info(f"收到的訊息id: {message_id}") 
     app.logger.info(f"收到圖片")
 
-    # 回覆使用者收到圖片
-    reply_text = f"LINEBot 收到圖片\nMessage ID: {message_id}\n檔名：n/a\n大小：n/a bytes"
+    # 生成回應
+    reply_text = f"LINEBot 收到圖片\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n檔名：n/a\n大小：n/a bytes"
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
@@ -140,8 +140,8 @@ def handle_file_message(event):
     app.logger.info(f"收到的訊息id: {message_id}") 
     app.logger.info(f"收到檔案(v3): {file_name} ({file_size} bytes)")
 
-    # 回覆使用者收到檔案
-    reply_text = f"LINEBot 收到檔案\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
+    # 生成回應
+    reply_text = f"LINEBot 收到檔案\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
     
     ## line_bot_api.reply_message(
     ##     event.reply_token,
