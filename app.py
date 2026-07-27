@@ -75,7 +75,7 @@ def handle_text_message(event):
     app.logger.info(f"收到文字: {user_message}")
 
     # 生成回應
-    reply_text = f"LINEBot 收到文字(v3)\nMessage ID: {message_id}\n內容: {user_message}"
+    reply_text = f"LINEBot 收到文字\nMessage ID: {message_id}\n內容: {user_message}"
     
     # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
@@ -101,7 +101,7 @@ def handle_image_message(event):
     app.logger.info(f"收到圖片")
 
     # 回覆使用者收到圖片
-    reply_text = f"LINEBot 收到圖片(v3)\nMessage ID: {message_id}\n檔名：n/a\n大小：n/a bytes"
+    reply_text = f"LINEBot 收到圖片\nMessage ID: {message_id}\n檔名：n/a\n大小：n/a bytes"
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
@@ -134,7 +134,7 @@ def handle_file_message(event):
     app.logger.info(f"收到檔案(v3): {file_name} ({file_size} bytes)")
 
     # 回覆使用者收到檔案
-    reply_text = f"LINEBot 收到檔案(V3)\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
+    reply_text = f"LINEBot 收到檔案\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
     
     ## line_bot_api.reply_message(
     ##     event.reply_token,
