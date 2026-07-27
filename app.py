@@ -72,15 +72,13 @@ def get_source_info(event):
     app.logger.info(f"room_id: {room_id}")
     return user_id, group_id, room_id
 
-app.logger.info(f"user_id: {user_id}")
-app.logger.info(f"group_id: {group_id}")
-app.logger.info(f"room_id: {room_id}")
-
-
 
 # 1. 設置一個事件處理器來處理 TextMessageContent 事件
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
+    # 抓出發訊者的 ID 資訊
+    user_id, group_id, room_id = get_source_info(event)
+    
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息
@@ -106,6 +104,8 @@ def handle_text_message(event):
 ## @handler.add(MessageEvent, message=ImageMessage)
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image_message(event):
+    # 抓出發訊者的 ID 資訊
+    user_id, group_id, room_id = get_source_info(event)
     
     # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
@@ -138,6 +138,8 @@ def handle_image_message(event):
 @handler.add(MessageEvent, message=FileMessageContent)
 
 def handle_file_message(event):
+    # 抓出發訊者的 ID 資訊
+    user_id, group_id, room_id = get_source_info(event)
     
     # 印出message.type
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
