@@ -107,25 +107,35 @@ def handle_text_message(event):
 
         
 # 2. 處理圖片訊息
-@handler.add(MessageEvent, message=ImageMessage)
+## @handler.add(MessageEvent, message=ImageMessage)
+@handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image_message(event):
     
     # 印出message.type
-    user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
+    user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     app.logger.info(f"收到的訊息type: {user_message_type}")
-
-
+    
     message_id = event.message.id
+    app.logger.info(f"收到圖片：  Message ID: {message_id}")
     # file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
     # file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
-    app.logger.info(f"收到圖片：  Message ID: {message_id}")
 
     # 回覆使用者收到圖片
     reply_text = f"收到你的圖片囉！(Message ID: {message_id})"
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=reply_text)
-    )
+    ## line_bot_api.reply_message(
+    ##     event.reply_token,
+    ##     TextSendMessage(text=reply_text)
+    ## )
+
+    # v3 回覆訊息的新寫法
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=reply_text)]
+            )
+        )
 
 
 # 3. 處理檔案訊息 (FileMessage)
