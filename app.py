@@ -82,12 +82,7 @@ def handle_text_message(event):
     app.logger.info(f"收到文字: {user_message}")
 
     # 生成回應
-    reply_text = f"LINEBot 收到文字\n
-                   User ID: {user_id}\n
-                   Group ID: {group_id}\n
-                   Room ID: {room_id}\n
-                   Message ID: {message_id}\n
-                   內容: {user_message}"
+    reply_text = f"LINEBot 收到文字\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n內容: {user_message}"
     
     # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
