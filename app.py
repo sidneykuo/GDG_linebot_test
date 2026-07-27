@@ -58,7 +58,8 @@ def callback():
 def handle_message(event: Event):
 
     # 2026/7/27 新增by Sidney，想查看message.type
-    app.logger.info(f"收到的message type: {event.message.type}")
+    user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
+    app.logger.info(f"收到的message type: {user_message_type}")
     
     if event.message.type == "text":
         user_message = event.message.text  # 使用者的訊息
