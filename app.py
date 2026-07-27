@@ -64,8 +64,8 @@ def handle_message(event: Event):
     user_message_type = event.message.type # 使用者的訊息型態 (test / image / file / ?...)
     app.logger.info(f"收到的訊息type: {user_message_type}")
 
-    user_message = event.message.text  # 使用者的訊息
-    app.logger.info(f"收到的訊息: {user_message}")
+        user_message = event.message.text  # 使用者的訊息
+        app.logger.info(f"收到的訊息: {user_message}")
 
     ## 使用 GPT 生成回應
     reply_text = ("LINEBot Test收到：" + user_message)
