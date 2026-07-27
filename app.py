@@ -1,37 +1,24 @@
 import os
 import logging
 from dotenv import load_dotenv
-from flask import Flask, request, abort
+from flask  import Flask, request, abort
 
 # 引入 LINE SDK v3 的模組
-from linebot.v3.webhook import WebhookHandler
+from linebot.v3.webhook    import WebhookHandler
 from linebot.v3.exceptions import InvalidSignatureError
-from linebot.v3.messaging import (
+from linebot.v3.messaging  import (
     Configuration,
     ApiClient,
     MessagingApi,
     ReplyMessageRequest,
     TextMessage
 )
-from linebot.v3.webhooks import (
+from linebot.v3.webhooks   import (
     MessageEvent,
     TextMessageContent,
     ImageMessageContent,
     FileMessageContent
 )
-
-
-#from linebot.v3.webhook import WebhookHandler, Event
-#from linebot.v3.exceptions import InvalidSignatureError
-#from linebot.v3.messaging.models import TextMessage
-#from linebot import LineBotApi, WebhookHandler
-#from linebot.models import ( 
-#    MessageEvent, 
-#    TextMessage, 
-#    ImageMessage,    # Sidney新增：圖片訊息事件模型
-#    FileMessage,     # Sidney新增：檔案訊息事件模型
-#    TextSendMessage,
-#    ImageSendMessage)
 
 
 # 加載 .env 文件中的變數
@@ -76,8 +63,7 @@ def callback():
     return 'OK'
 
 
-# 1. 設置一個事件處理器來處理 TextMessage 事件
-## @handler.add(MessageEvent, message=TextMessage)
+# 1. 設置一個事件處理器來處理 TextMessageContent 事件
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
@@ -86,14 +72,8 @@ def handle_text_message(event):
     app.logger.info(f"收到的文字訊息: {user_message}")
 
     # 生成回應
-    # reply_text = ("LINEBot Test收到：" + user_message)
-    reply_text = f"LINEBot Test收到(v3)：{user_message}"
+    reply_text = f"LINEBot 收到文字訊息(v3)：{user_message}"
     
-    ## line_bot_api.reply_message(
-    ##     event.reply_token,
-    ##    TextSendMessage(text=reply_text)
-    ##)
-
     # v3 回覆訊息的新寫法
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
@@ -115,11 +95,11 @@ def handle_image_message(event):
     
     message_id = event.message.id
     app.logger.info(f"收到圖片：  Message ID: {message_id}")
-    # file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
-    # file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
+    file_name  = event.message.file_name  # 檔案名稱          => 'ImageMessage' object has no attribute 'file_name'
+    file_size  = event.message.file_size  # 檔案大小 (Bytes)  => 'ImageMessage' object has no attribute 'file_size'
 
     # 回覆使用者收到圖片
-    reply_text = f"收到的圖片訊息(v3)！(Message ID: {message_id})"
+    reply_text = f"LINEBot 收到圖片(v3)\n(Message ID: {message_id})"
     ## line_bot_api.reply_message(
     ##     event.reply_token,
     ##     TextSendMessage(text=reply_text)
@@ -153,7 +133,7 @@ def handle_file_message(event):
     app.logger.info(f"收到檔案訊息(v3): {file_name} ({file_size} bytes), Message ID: {message_id}")
 
     # 回覆使用者收到檔案
-    reply_text = f"收到檔案！\n檔名：{file_name}\n大小：{file_size} bytes"
+    reply_text = f"LINEBot 收到檔案(V3)\n檔名：{file_name}\n大小：{file_size} bytes"
    
     ## line_bot_api.reply_message(
     ##     event.reply_token,
