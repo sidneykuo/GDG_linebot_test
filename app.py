@@ -85,7 +85,9 @@ def handle_image_message(event):
 
 
     message_id = event.message.id
-    app.logger.info(f"收到圖片訊息，Message ID: {message_id}")
+    file_name  = event.message.file_name  # 檔案名稱
+    file_size  = event.message.file_size  # 檔案大小 (Bytes)
+    app.logger.info(f"收到圖片： {file_name} ({file_size} bytes), Message ID: {message_id}")
 
     # 回覆使用者收到圖片
     reply_text = f"收到你的圖片囉！(Message ID: {message_id})"
@@ -104,13 +106,13 @@ def handle_file_message(event):
     app.logger.info(f"收到的訊息type: {user_message_type}")
     
     message_id = event.message.id
-    file_name = event.message.file_name  # 檔案名稱
-    file_size = event.message.file_size  # 檔案大小 (Bytes)
+    file_name  = event.message.file_name  # 檔案名稱
+    file_size  = event.message.file_size  # 檔案大小 (Bytes)
     
     app.logger.info(f"收到檔案訊息: {file_name} ({file_size} bytes), Message ID: {message_id}")
 
     # 回覆使用者收到檔案
-    reply_text = f"收到檔案囉！\n檔名：{file_name}\n大小：{file_size} bytes"
+    reply_text = f"收到檔案！\n檔名：{file_name}\n大小：{file_size} bytes"
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_text)
