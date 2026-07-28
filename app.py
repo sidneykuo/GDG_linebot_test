@@ -98,11 +98,11 @@ def handle_text_message(event):
 
     reply_text = (
         f"LINEBot 收到文字\n"
-        f"User ID: {user_id}\n"
-        f"Group ID: {group_id}\n"
-        f"Room ID: {room_id}\n"
-        f"Message ID: {message_id}\n"
-        f"內容: {user_message}"
+        f"  User ID: {user_id}\n"
+        f"  Group ID: {group_id}\n"
+        f"  Room ID: {room_id}\n"
+        f"  Message ID: {message_id}\n"
+        f"  內容: {user_message}"
     )
     
     reply_text_message(event.reply_token, reply_text)
@@ -119,11 +119,11 @@ def handle_image_message(event):
 
     reply_text = (
         f"LINEBot 收到圖片\n"
-        f"User ID: {user_id}\n"
-        f"Group ID: {group_id}\n"
-        f"Room ID: {room_id}\n"
-        f"Message ID: {message_id}\n"
-        f"檔名：n/a\n大小：n/a bytes"
+        f"  User ID: {user_id}\n"
+        f"  Group ID: {group_id}\n"
+        f"  Room ID: {room_id}\n"
+        f"  Message ID: {message_id}\n"
+        f"  檔名：n/a\n大小：n/a bytes"
     )
 
     reply_text_message(event.reply_token, reply_text)
@@ -142,12 +142,12 @@ def handle_file_message(event):
 
     reply_text = (
         f"LINEBot 收到檔案\n"
-        f"User ID: {user_id}\n"
-        f"Group ID: {group_id}\n"
-        f"Room ID: {room_id}\n"
-        f"Message ID: {message_id}\n"
-        f"檔名：{file_name}\n"
-        f"大小：{file_size} bytes"
+        f"  User ID: {user_id}\n"
+        f"  Group ID: {group_id}\n"
+        f"  Room ID: {room_id}\n"
+        f"  Message ID: {message_id}\n"
+        f"  檔名：{file_name}\n"
+        f"  大小：{file_size} bytes"
     )
 
     reply_text_message(event.reply_token, reply_text)
