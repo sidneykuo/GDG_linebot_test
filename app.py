@@ -126,7 +126,7 @@ def handle_text_message(event):
     details = get_source_info(event)
     user_info = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "私訊")
-    room_id = f"{details['room_id']}
+    room_id = f"{details['room_id']}"
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
