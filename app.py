@@ -115,7 +115,7 @@ def handle_image_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | GrpID: {group_id} | RoomID: {room_id} | Text: {user_message}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | GrpID: {group_id} | RoomID: {room_id}")
 
     reply_text = (
         f"LINEBot 收到圖片\n"
