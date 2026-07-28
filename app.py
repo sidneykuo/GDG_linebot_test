@@ -142,7 +142,7 @@ def handle_file_message(event):
     file_size  = event.message.file_size   # 檔案大小 (Bytes)
     app.logger.info(f"收到的訊息type: {user_message_type}")
     app.logger.info(f"收到的訊息id: {message_id}") 
-    app.logger.info(f"收到檔案(v3): {file_name} ({file_size} bytes)")
+    app.logger.info(f"收到檔案: {file_name} ({file_size} bytes)")
 
     # 生成回應
     reply_text = f"LINEBot 收到檔案\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
