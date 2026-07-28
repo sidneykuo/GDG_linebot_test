@@ -123,17 +123,22 @@ def callback():
 # 1. 處理文字訊息
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
-    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    details = get_source_info(event)
+    user_info = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
+    group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "私訊")
+    room_id = f"{details['room_id']}}
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
     
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | UsrNM: {user_name} | GrpID: {group_id} | GrpNM: {group_name} | RoomID: {room_id} | Text: {user_message}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Text: {user_message}")
 
     reply_text = (
         f"LINEBot 收到文字\n"
-        f"  --User ID: {user_id}\n"
-        f"  --Group ID: {group_id}\n"
+        f"  --User Info ：{user_info}\n"
+        f"  --Group Info：{group_info}\n"
+        ## f"  --User ID: {user_id}\n"
+        ## f"  --Group ID: {group_id}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --文字訊息: {user_message}"
