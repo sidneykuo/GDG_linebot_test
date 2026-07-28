@@ -34,9 +34,7 @@ if not line_token or not line_secret:
     print(f"LINE_SECRET: {line_secret}")  # 調試輸出
     raise ValueError("LINE_TOKEN 或 LINE_SECRET 未設置")
 
-# 初始化 LineBotApi 和 WebhookHandler
-## line_bot_api = LineBotApi(line_token)
-## handler = WebhookHandler(line_secret)
+# 初始化 LINE SDK v3 設定
 configuration = Configuration(access_token=line_token)
 handler = WebhookHandler(line_secret)
 
@@ -117,10 +115,6 @@ def handle_image_message(event):
 
     # 生成回應
     reply_text = f"LINEBot 收到圖片\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n檔名：n/a\n大小：n/a bytes"
-    ## line_bot_api.reply_message(
-    ##     event.reply_token,
-    ##     TextSendMessage(text=reply_text)
-    ## )
 
     # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
@@ -152,12 +146,8 @@ def handle_file_message(event):
 
     # 生成回應
     reply_text = f"LINEBot 收到檔案\nUser ID: {user_id}\nGroup ID: {group_id}\nRoom ID: {room_id}\nMessage ID: {message_id}\n檔名：{file_name}\n大小：{file_size} bytes"
-    
-    ## line_bot_api.reply_message(
-    ##     event.reply_token,
-    ##     TextSendMessage(text=reply_text)
-    ## )
-    
+
+    # v3 回覆訊息的寫法
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message(
