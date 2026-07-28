@@ -50,8 +50,42 @@ def get_source_info(event):
     user_id = getattr(event.source, 'user_id', None)
     group_id = getattr(event.source, 'group_id', None)
     room_id = getattr(event.source, 'room_id', None)
-    return user_id, group_id, room_id
 
+    user_name = None
+    group_name = None
+
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+
+        # 1. 嘗試取得 User Name (使用者名稱/暱稱)
+        if user_id:
+            try:
+                if group_id:
+                    # 如果在群組內，取得該群組成員的名單資料
+                    member_profile = line_bot_api.get_group_member_profile(group_id, user_id)
+                    user_name = member_profile.display_name
+                else:
+                    # 如果是一對一私訊
+                    profile = line_bot_api.get_profile(user_id)
+                    user_name = profile.display_name
+            except Exception as e:
+                app.logger.error(f"無法取得 User Name: {e}")
+
+        # 2. 嘗試取得 Group Name (群組名稱)
+        if group_id:
+            try:
+                group_summary = line_bot_api.get_group_summary(group_id)
+                group_name = group_summary.group_name
+            except Exception as e:
+                app.logger.error(f"無法取得 Group Name: {e}")
+
+    return {
+        "user_id": user_id,
+        "user_name": user_name,
+        "group_id": group_id,
+        "group_name": group_name,
+        "room_id": room_id
+    }
 
 def reply_text_message(event_reply_token: str, text: str):
     """統一封裝回覆訊息邏輯，避免程式碼重複"""
@@ -89,12 +123,12 @@ def callback():
 # 1. 處理文字訊息
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
-    user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
     
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | GrpID: {group_id} | RoomID: {room_id} | Text: {user_message}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | UsrNM: {user_name} | GrpID: {group_id} | GrpNM: {group_name} | RoomID: {room_id} | Text: {user_message}")
 
     reply_text = (
         f"LINEBot 收到文字\n"
@@ -111,7 +145,8 @@ def handle_text_message(event):
 # 2. 處理圖片訊息
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image_message(event):
-    user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    ## user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
@@ -133,7 +168,8 @@ def handle_image_message(event):
 # 3. 處理檔案訊息
 @handler.add(MessageEvent, message=FileMessageContent)
 def handle_file_message(event):
-    user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    ## user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
     message_id = event.message.id          # 使用者的訊息ID
     file_name = event.message.file_name    # 檔案名稱
