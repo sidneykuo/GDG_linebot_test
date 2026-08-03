@@ -1,7 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
-from flask import Flask, request, abort
+from flask import Flask, request, abort, send_from_directory
 
 # 引入 LINE SDK v3 的模組
 from linebot.v3.webhook import WebhookHandler
@@ -10,8 +10,10 @@ from linebot.v3.messaging import (
     Configuration,
     ApiClient,
     MessagingApi,
+    MessagingApiBlob,
     ReplyMessageRequest,
-    TextMessage
+    TextMessage,
+    FileMessage
 )
 from linebot.v3.webhooks import (
     MessageEvent,
@@ -118,6 +120,13 @@ def callback():
     return 'OK'
 
 
+# 提供儲存檔案對外公開下載的靜態檔案路由
+@app.route('/downloads/<filename>', methods=['GET'])
+def download_file(filename):
+    download_dir = os.path.join(app.root_path, 'downloads')
+    return send_from_directory(download_dir, filename)
+
+
 # ==================== 事件處理器 (Event Handlers) ====================
 
 # 1. 處理文字訊息
@@ -177,7 +186,7 @@ def handle_image_message(event):
     reply_text_message(event.reply_token, reply_text)
 
 
-# 3. 處理檔案訊息
+# 3. 處理檔案訊息 (重構為可回傳原始檔案)
 @handler.add(MessageEvent, message=FileMessageContent)
 def handle_file_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
@@ -193,6 +202,26 @@ def handle_file_message(event):
     app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Name: {file_name} ({file_size} bytes)")
 
+    # 1. 建立下載目錄並儲存從 LINE 取得的檔案
+    download_dir = "downloads"
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+
+    # 用 message_id 作為檔名前綴，避免同名檔案覆蓋問題
+    saved_filename = f"{message_id}_{file_name}"
+    save_path = os.path.join(download_dir, saved_filename)
+
+    with ApiClient(configuration) as api_client:
+        blob_api = MessagingApiBlob(api_client)
+        content = blob_api.get_message_content(message_id)
+        with open(save_path, "wb") as f:
+            f.write(content)
+
+    # 2. 建立此檔案的公開存取 HTTPS 網址 (從目前 request 的域名動態生成，例: https://xxx.onrender.com/downloads/...)
+    base_url = request.host_url.replace("http://", "https://")
+    file_url = f"{base_url}downloads/{saved_filename}"
+
+    # 3. 組裝原本要回覆的文字訊息
     reply_text = (
         f"LINEBot 收到檔案\n"
         f"  --User Info ：{user_info}\n"
@@ -203,7 +232,22 @@ def handle_file_message(event):
         f"  --大小：{file_size} bytes"
     )
 
-    reply_text_message(event.reply_token, reply_text)
+    # 4. 一併回覆「說明文字」與「原封不動的檔案訊息」給發送者/群組
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[
+                    TextMessage(text=reply_text),
+                    FileMessage(
+                        original_content_url=file_url,
+                        file_name=file_name,
+                        file_size=file_size
+                    )
+                ]
+            )
+        )
 
 
 # 應用程序入口點
