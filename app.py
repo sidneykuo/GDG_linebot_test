@@ -131,7 +131,8 @@ def handle_text_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
-    
+
+    app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Text: {user_message}")
 
     reply_text = (
@@ -160,6 +161,7 @@ def handle_image_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
+    app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id}")
 
     reply_text = (
@@ -168,7 +170,7 @@ def handle_image_message(event):
         f"  --Group Info：{group_info}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
-        f"  --檔名：圖檔無檔名資訊"
+        f"  --檔名：圖檔無檔名資訊\n"
         f"  --大小：圖檔無大小資訊"
     )
 
@@ -188,6 +190,7 @@ def handle_file_message(event):
     file_name = event.message.file_name    # 檔案名稱
     file_size = event.message.file_size    # 檔案Size
 
+    app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Name: {file_name} ({file_size} bytes)")
 
     reply_text = (
