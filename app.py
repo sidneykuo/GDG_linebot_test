@@ -246,9 +246,9 @@ def handle_file_message(event):
                 messages=[
                     TextMessage(text=reply_text),
                     FileMessage(
-                        original_content_url=file_url,
-                        file_name=file_name,
-                        file_size=file_size
+                        originalContentUrl=file_url,
+                        fileName=file_name,
+                        fileSize=file_size
                     )
                 ]
             )
