@@ -123,10 +123,11 @@ def callback():
 # 1. 處理文字訊息
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
-    details = get_source_info(event)
+    details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
     user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
     room_id = f"{details['room_id']}"
+    
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
@@ -135,11 +136,11 @@ def handle_text_message(event):
 
     reply_text = (
         f"LINEBot 收到文字\n"
+        #### 暫時保留以下兩行以備不時之需
+        #### f"  --User ID: {user_id}\n"
+        #### f"  --Group ID: {group_id}\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        # 暫時保留以下兩行以備不時之需
-        # f"  --User ID: {user_id}\n"
-        # f"  --Group ID: {group_id}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --文字訊息: {user_message}"
@@ -151,8 +152,11 @@ def handle_text_message(event):
 # 2. 處理圖片訊息
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image_message(event):
-    ## user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
-    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
+    user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
+    group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
+    room_id = f"{details['room_id']}"
+    
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
@@ -160,12 +164,12 @@ def handle_image_message(event):
 
     reply_text = (
         f"LINEBot 收到圖片\n"
-        f"  --User ID: {user_id}\n"
-        f"  --Group ID: {group_id}\n"
+        f"  --User Info ：{user_info}\n"
+        f"  --Group Info：{group_info}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
-        f"  --檔名：n/a\n"
-        f"  --大小：n/a bytes"
+        f"  --檔名：圖檔無檔名資訊"
+        f"  --大小：圖檔無大小資訊"
     )
 
     reply_text_message(event.reply_token, reply_text)
@@ -174,8 +178,11 @@ def handle_image_message(event):
 # 3. 處理檔案訊息
 @handler.add(MessageEvent, message=FileMessageContent)
 def handle_file_message(event):
-    ## user_id, group_id, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
-    user_id, user_name, group_id, group_name, room_id = get_source_info(event) # 呼叫Helper小幫手抓出使用者資訊
+    details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
+    user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
+    group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
+    room_id = f"{details['room_id']}"
+    
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
     message_id = event.message.id          # 使用者的訊息ID
     file_name = event.message.file_name    # 檔案名稱
@@ -185,8 +192,8 @@ def handle_file_message(event):
 
     reply_text = (
         f"LINEBot 收到檔案\n"
-        f"  --User ID: {user_id}\n"
-        f"  --Group ID: {group_id}\n"
+        f"  --User Info ：{user_info}\n"
+        f"  --Group Info：{group_info}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --檔名：{file_name}\n"
