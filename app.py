@@ -160,7 +160,7 @@ def handle_image_message(event):
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | UsrNM: {user_name} | GrpID: {group_id} | GrpNM: {group_name} | RoomID: {room_id}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id}")
 
     reply_text = (
         f"LINEBot 收到圖片\n"
@@ -188,7 +188,7 @@ def handle_file_message(event):
     file_name = event.message.file_name    # 檔案名稱
     file_size = event.message.file_size    # 檔案Size
 
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrID: {user_id} | UsrNM: {user_name} | GrpID: {group_id} | GrpNM: {group_name} | RoomID: {room_id} | Name: {file_name} ({file_size} bytes)")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Name: {file_name} ({file_size} bytes)")
 
     reply_text = (
         f"LINEBot 收到檔案\n"
