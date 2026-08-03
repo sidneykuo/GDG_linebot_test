@@ -137,10 +137,9 @@ def handle_text_message(event):
         f"LINEBot 收到文字\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        ''' 暫時保留這兩行以備不時之需
-        f"  --User ID: {user_id}\n"
-        f"  --Group ID: {group_id}\n"
-        ''' 暫時保留這兩行以備不時之需
+        # 暫時保留以下兩行以備不時之需
+        # f"  --User ID: {user_id}\n"
+        # f"  --Group ID: {group_id}\n"
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --文字訊息: {user_message}"
