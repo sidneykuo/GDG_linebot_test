@@ -11,10 +11,15 @@ from linebot.v3.messaging import (
     ApiClient,
     MessagingApi,
     MessagingApiBlob,
-    ReplyMessageRequest,
+    ReplyMessageRequest
+)
+
+# 修正：將所有 Message 類型 models 從 linebot.v3.messaging.models 統一引入
+from linebot.v3.messaging.models import (
     TextMessage,
     FileMessage
 )
+
 from linebot.v3.webhooks import (
     MessageEvent,
     TextMessageContent,
