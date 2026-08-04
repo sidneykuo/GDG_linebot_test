@@ -319,11 +319,18 @@ def handle_sticker_message(event):
     try:
         response = requests.get(cdn_sticker_url)
         if response.status_code == 200:
-            # 用 Pillow 開啟 PNG 圖片，轉為 RGB 格式後存成 JPEG（確保 LINE 100% 能夠正常發送 ImageMessage）
+            # 用 Pillow 開啟 PNG 圖片
             image = Image.open(io.BytesIO(response.content))
-            if image.mode in ("RGBA", "P"):
-                image = image.convert("RGB")
-            image.save(save_path, "JPEG")
+            
+            # 若為帶透明圖層的圖片 (RGBA, LA, P 模式)，建立白色底圖進行合成，防止透明處變黑
+            if image.mode in ("RGBA", "LA", "P"):
+                image = image.convert("RGBA")
+                background = Image.new("RGBA", image.size, (255, 255, 255, 255))
+                composite_image = Image.alpha_composite(background, image)
+                final_image = composite_image.convert("RGB")
+                final_image.save(save_path, "JPEG")
+            else:
+                image.save(save_path, "JPEG")
         else:
             app.logger.error(f"下載貼圖失敗，HTTP 狀態碼: {response.status_code}")
     except Exception as e:
