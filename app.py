@@ -1,6 +1,7 @@
 import os
 import logging
 import io
+import requests  # 引入 requests 用於下載 LINE CDN 的貼圖圖片
 
 from dotenv import load_dotenv
 from flask  import Flask, request, abort, send_from_directory
@@ -303,12 +304,39 @@ def handle_sticker_message(event):
     keywords = getattr(event.message, 'keywords', None)       #貼圖關鍵字
     keywords_str = ", ".join(keywords) if keywords else "無"  #貼圖關鍵字從List解析為逗號分隔
 
-    # 拼接 LINE 官方 CDN 貼圖圖片網址
-    sticker_image_url = f"https://stickershop.line-scdn.net/stickershop/v1/sticker/{sticker_id}/android/sticker.png"
+    # 1. 建立下載目錄
+    download_dir = "downloads"
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+
+    # 用 message_id 與 sticker_id 作為檔名，並統一轉檔存成 JPG
+    saved_filename = f"{message_id}_{sticker_id}.jpg"
+    save_path = os.path.join(download_dir, saved_filename)
+
+    # 2. 從 LINE 官方 CDN 下載貼圖圖片（預設為 PNG 格式）
+    cdn_sticker_url = f"https://stickershop.line-scdn.net/stickershop/v1/sticker/{sticker_id}/android/sticker.png"
+    
+    try:
+        response = requests.get(cdn_sticker_url)
+        if response.status_code == 200:
+            # 用 Pillow 開啟 PNG 圖片，轉為 RGB 格式後存成 JPEG（確保 LINE 100% 能夠正常發送 ImageMessage）
+            image = Image.open(io.BytesIO(response.content))
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+            image.save(save_path, "JPEG")
+        else:
+            app.logger.error(f"下載貼圖失敗，HTTP 狀態碼: {response.status_code}")
+    except Exception as e:
+        app.logger.error(f"下載或轉檔貼圖失敗: {e}")
+
+    # 3. 產生 Render 上公開存取的 HTTPS 圖檔網址
+    base_url = request.host_url.replace("http://", "https://")
+    image_url = f"{base_url}downloads/{saved_filename}"
 
     app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | StickerID: {sticker_id} | PackageID: {package_id}")
 
+    # 4. 組裝資訊文字              
     reply_text = (
         f"LINEBot 收到貼圖\n"
         f"  --User Info ：{user_info}\n"
@@ -319,11 +347,24 @@ def handle_sticker_message(event):
         f"  --Sticker ID: {sticker_id}\n"
         f"  --貼圖類型: {sticker_resource_type}\n"
         f"  --關鍵字: {keywords_str}\n"
-        f"  --貼圖圖片網址：\n{sticker_image_url}"
+        f"  --貼圖圖片網址：\n{image_url}"
     )
     
-    # 4. 回覆給發送者/群組
-    reply_text_message(event.reply_token, reply_text)
+    # 5. 回覆「說明文字」與下載下來的「貼圖圖片 (ImageMessage)」給發送者/群組
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[
+                    TextMessage(text=reply_text),
+                    ImageMessage(
+                        original_content_url=image_url, # 原圖網址
+                        preview_image_url=image_url     # 預覽圖網址
+                    )
+                ]
+            )
+        )
 
 
 # 應用程序入口點
