@@ -1,9 +1,10 @@
 import os
 import logging
 import io
+
 from dotenv import load_dotenv
 from flask  import Flask, request, abort, send_from_directory
-from PIL    import Image 
+from PIL    import Image
 
 # 引入 LINE SDK v3 的模組
 from linebot.v3.webhook import WebhookHandler
@@ -21,9 +22,10 @@ from linebot.v3.messaging.models import TextMessage, ImageMessage
 
 from linebot.v3.webhooks import (
     MessageEvent,
-    TextMessageContent,
-    ImageMessageContent,
-    FileMessageContent
+    TextMessageContent,    # 引入文字訊息型態
+    ImageMessageContent,   # 引入圖形訊息型態
+    FileMessageContent,    # 引入檔案訊息型態
+    StickerMessageContent  # 引入貼圖訊息型態        
 )
 
 # 1. 加載 .env 環境變數
@@ -35,9 +37,6 @@ line_secret = os.getenv('LINE_SECRET')
 
 # 檢查是否設置了環境變數
 if not line_token or not line_secret:
-    ## 以下兩行被Gemini移除，不確定是否是多餘的?? 待研究
-    ## print(f"LINE_TOKEN: {line_token}")  # 調試輸出
-    ## print(f"LINE_SECRET: {line_secret}")  # 調試輸出
     raise ValueError("LINE_TOKEN 或 LINE_SECRET 未設置，請檢查 .env 檔案")
 
 # 2. 初始化 LINE SDK 物件
@@ -281,7 +280,48 @@ def handle_file_message(event):
         f"  --大小：{file_size} bytes\n"
         f"  --檔案下載網址：\n{file_url}"
     )
+    
+    # 4. 回覆給發送者/群組
+    reply_text_message(event.reply_token, reply_text)
 
+
+# 4. 處理貼圖訊息
+@handler.add(MessageEvent, message=StickerMessageContent)
+def handle_sticker_message(event):
+    details = get_source_info(event)
+    user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
+    group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
+    room_id = f"{details['room_id']}"
+    
+    user_message_type = event.message.type
+    message_id = event.message.id
+    
+    # 抓取貼圖的元資料 (Metadata)
+    sticker_id = event.message.sticker_id  # 貼圖ID
+    package_id = event.message.package_id  # 貼圖包ID
+    sticker_resource_type = getattr(event.message, 'sticker_resource_type', 'STATIC') # 貼圖類型
+    keywords = getattr(event.message, 'keywords', None)       #貼圖關鍵字
+    keywords_str = ", ".join(keywords) if keywords else "無"  #貼圖關鍵字從List解析為逗號分隔
+
+    # 拼接 LINE 官方 CDN 貼圖圖片網址
+    sticker_image_url = f"https://stickershop.line-scdn.net/stickershop/v1/sticker/{sticker_id}/android/sticker.png"
+
+    app.logger.info(f"完整 Event 內容: {event}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | StickerID: {sticker_id} | PackageID: {package_id}")
+
+    reply_text = (
+        f"LINEBot 收到貼圖\n"
+        f"  --User Info ：{user_info}\n"
+        f"  --Group Info：{group_info}\n"
+        f"  --Room ID: {room_id}\n"
+        f"  --Message ID: {message_id}\n"
+        f"  --Package ID: {package_id}\n"
+        f"  --Sticker ID: {sticker_id}\n"
+        f"  --貼圖類型: {sticker_resource_type}\n"
+        f"  --關鍵字: {keywords_str}\n"
+        f"  --貼圖圖片網址：\n{sticker_image_url}"
+    )
+    
     # 4. 回覆給發送者/群組
     reply_text_message(event.reply_token, reply_text)
 
