@@ -332,11 +332,11 @@ def handle_sticker_message(event):
     # 3. 產生 Render 上公開存取的 HTTPS 圖檔網址
     base_url = request.host_url.replace("http://", "https://")
     image_url = f"{base_url}downloads/{saved_filename}"
-
+    
     app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | StickerID: {sticker_id} | PackageID: {package_id}")
 
-    # 4. 組裝資訊文字              
+    # 4. 組裝資訊文字
     reply_text = (
         f"LINEBot 收到貼圖\n"
         f"  --User Info ：{user_info}\n"
