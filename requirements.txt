@@ -1,8 +1,5 @@
-python-dotenv
 flask
-line-bot-sdk
-lxml
 gunicorn
-pymongo
-imgurpython
-requests
+python-dotenv
+line-bot-sdk
+Pillow
