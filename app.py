@@ -1,7 +1,9 @@
 import os
 import logging
+import io
 from dotenv import load_dotenv
-from flask import Flask, request, abort, send_from_directory
+from flask  import Flask, request, abort, send_from_directory
+from PIL    import Image 
 
 # 引入 LINE SDK v3 的模組
 from linebot.v3.webhook import WebhookHandler
@@ -14,8 +16,8 @@ from linebot.v3.messaging import (
     ReplyMessageRequest
 )
 
-# 只引入官方支援的 TextMessage
-from linebot.v3.messaging.models import TextMessage
+# 在 models 中引入 ImageMessage 與 TextMessage
+from linebot.v3.messaging.models import TextMessage, ImageMessage
 
 from linebot.v3.webhooks import (
     MessageEvent,
@@ -161,7 +163,7 @@ def handle_text_message(event):
     reply_text_message(event.reply_token, reply_text)
 
 
-# 2. 處理圖片訊息
+# 2. 處理圖片訊息 (自動轉檔為 JPG 以相容所有圖片格式)
 @handler.add(MessageEvent, message=ImageMessageContent)
 def handle_image_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
@@ -175,6 +177,37 @@ def handle_image_message(event):
     app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id}")
 
+    # 1. 建立下載目錄
+    download_dir = "downloads"
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+
+    saved_filename = f"{message_id}.jpg"
+    save_path = os.path.join(download_dir, saved_filename)
+
+    # 2. 下載圖片並利用 Pillow 轉檔為標準 JPEG 格式 (相容 BMP, GIF, PNG, JPG)
+    with ApiClient(configuration) as api_client:
+        blob_api = MessagingApiBlob(api_client)
+        content = blob_api.get_message_content(message_id)
+        
+        try:
+            # 用 Pillow 開啟記憶體中的二進位圖片
+            image = Image.open(io.BytesIO(content))
+            # 若為 RGBA (例如透明 PNG) 或 P 模式 (例如 GIF/BMP)，先轉為 RGB 才能存成 JPG
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+            # 統一儲存為 JPEG 格式
+            image.save(save_path, "JPEG")
+        except Exception as e:
+            app.logger.error(f"圖片轉檔失敗，改直接寫入原檔: {e}")
+            with open(save_path, "wb") as f:
+                f.write(content)
+
+    # 3. 產生 Render 上公開存取的 HTTPS 圖檔網址
+    base_url = request.host_url.replace("http://", "https://")
+    image_url = f"{base_url}downloads/{saved_filename}"
+
+    # 4. 組裝資訊文字
     reply_text = (
         f"LINEBot 收到圖片\n"
         f"  --User Info ：{user_info}\n"
@@ -185,7 +218,21 @@ def handle_image_message(event):
         f"  --大小：圖檔無大小資訊"
     )
 
-    reply_text_message(event.reply_token, reply_text)
+    # 5. 回覆「說明文字」與「圖片訊息 (ImageMessage)」給發送者/群組
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[
+                    TextMessage(text=reply_text),
+                    ImageMessage(
+                        original_content_url=image_url, # 原圖網址
+                        preview_image_url=image_url     # 預覽圖網址
+                    )
+                ]
+            )
+        )
 
 
 # 3. 處理檔案訊息 (儲存檔案並回傳公開下載網址)
