@@ -191,7 +191,7 @@ def handle_image_message(event):
     reply_text_message(event.reply_token, reply_text)
 
 
-# 3. 處理檔案訊息 (重構為可回傳原始檔案)
+# 3. 處理檔案訊息 (接收檔案後產出下載連結回傳)
 @handler.add(MessageEvent, message=FileMessageContent)
 def handle_file_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
@@ -222,11 +222,11 @@ def handle_file_message(event):
         with open(save_path, "wb") as f:
             f.write(content)
 
-    # 2. 建立此檔案的公開存取 HTTPS 網址 (從目前 request 的域名動態生成，例: https://xxx.onrender.com/downloads/...)
+    # 2. 建立此檔案的公開存取 HTTPS 網址 (從目前 request 的域名動態生成)
     base_url = request.host_url.replace("http://", "https://")
     file_url = f"{base_url}downloads/{saved_filename}"
 
-    # 3. 組裝原本要回覆的文字訊息
+    # 3. 組裝原本要回覆的文字訊息 + 下載連結
     reply_text = (
         f"LINEBot 收到檔案\n"
         f"  --User Info ：{user_info}\n"
@@ -234,25 +234,12 @@ def handle_file_message(event):
         f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --檔名：{file_name}\n"
-        f"  --大小：{file_size} bytes"
+        f"  --大小：{file_size} bytes\n"
+        f"  --檔案下載連結：\n{file_url}"
     )
 
-    # 4. 一併回覆「說明文字」與「原封不動的檔案訊息」給發送者/群組
-    with ApiClient(configuration) as api_client:
-        line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[
-                    TextMessage(text=reply_text),
-                    FileMessage(
-                        originalContentUrl=file_url,
-                        fileName=file_name,
-                        fileSize=file_size
-                    )
-                ]
-            )
-        )
+    # 4. 回覆給發送者/群組
+    reply_text_message(event.reply_token, reply_text)
 
 
 # 應用程序入口點
