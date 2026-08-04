@@ -14,11 +14,8 @@ from linebot.v3.messaging import (
     ReplyMessageRequest
 )
 
-# 修正：將所有 Message 類型 models 從 linebot.v3.messaging.models 統一引入
-from linebot.v3.messaging.models import (
-    TextMessage,
-    FileMessage
-)
+# 只引入官方支援的 TextMessage
+from linebot.v3.messaging.models import TextMessage
 
 from linebot.v3.webhooks import (
     MessageEvent,
@@ -191,7 +188,7 @@ def handle_image_message(event):
     reply_text_message(event.reply_token, reply_text)
 
 
-# 3. 處理檔案訊息 (接收檔案後產出下載連結回傳)
+# 3. 處理檔案訊息 (儲存檔案並回傳公開下載網址)
 @handler.add(MessageEvent, message=FileMessageContent)
 def handle_file_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
@@ -222,11 +219,11 @@ def handle_file_message(event):
         with open(save_path, "wb") as f:
             f.write(content)
 
-    # 2. 建立此檔案的公開存取 HTTPS 網址 (從目前 request 的域名動態生成)
+    # 2. 生成 Render 上的公開存取網址 (自動偵測當前功能網域並補上 HTTPS)
     base_url = request.host_url.replace("http://", "https://")
     file_url = f"{base_url}downloads/{saved_filename}"
 
-    # 3. 組裝原本要回覆的文字訊息 + 下載連結
+    # 3. 組裝原本要回覆的文字訊息，並附上下載網址
     reply_text = (
         f"LINEBot 收到檔案\n"
         f"  --User Info ：{user_info}\n"
@@ -235,7 +232,7 @@ def handle_file_message(event):
         f"  --Message ID: {message_id}\n"
         f"  --檔名：{file_name}\n"
         f"  --大小：{file_size} bytes\n"
-        f"  --檔案下載連結：\n{file_url}"
+        f"  --檔案下載網址：\n{file_url}"
     )
 
     # 4. 回覆給發送者/群組
