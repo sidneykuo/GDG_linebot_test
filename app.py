@@ -47,7 +47,7 @@ handler = WebhookHandler(line_secret)
 # 創建 Flask 應用
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
-app.logger.info(f"After logging level settiing")
+# app.logger.info(f"After logging level settiing")
 
 
 # 在所有 Request 進來時先執行的 Hook 函式
@@ -56,13 +56,14 @@ def log_incoming_request():
     # 若此處夠清楚，下列幾行獨立的 logger.info 應該可以移掉
     app.logger.info(f"📥 [{request.method}] {request.path} | Remote IP: {request.remote_addr}")
 
+    # 暫時保留
     # 取得請求的方法 (GET/POST) 與 請求路徑 (例如 / 或 /downloads/xxx)
-    app.logger.info("\n" + "="*50)
-    app.logger.info(f"📥 收到新的 HTTP Request!")
-    app.logger.info(f"   -- 方法: {request.method}")
-    app.logger.info(f"   -- 路徑: {request.path}")
-    app.logger.info(f"   -- 來源 IP: {request.remote_addr}")
-    app.logger.info("="*50 + "\n")
+    # app.logger.info("\n" + "="*50)
+    # app.logger.info(f"📥 收到新的 HTTP Request!")
+    # app.logger.info(f"   -- 方法: {request.method}")
+    # app.logger.info(f"   -- 路徑: {request.path}")
+    # app.logger.info(f"   -- 來源 IP: {request.remote_addr}")
+    # app.logger.info("="*50 + "\n")
 
 
 # ==================== Helper 小幫手函式 -- BEGIN ====================
@@ -70,7 +71,6 @@ def get_source_info(event):
     """安全取得 User ID 和 Group ID(群組ID) 和Room ID(多人聊天室ID)"""
     user_id = getattr(event.source, 'user_id', None)
     group_id = getattr(event.source, 'group_id', None)
-    room_id = getattr(event.source, 'room_id', None)
 
     user_name = None
     group_name = None
@@ -105,7 +105,6 @@ def get_source_info(event):
         "user_name": user_name,
         "group_id": group_id,
         "group_name": group_name,
-        "room_id": room_id
     }
 
 def reply_text_message(event_reply_token: str, text: str):
@@ -130,7 +129,7 @@ def callback():
     
     # 取得請求的原始內容
     body = request.get_data(as_text=True)
-    app.logger.info(f"Request body: {body}")
+    # app.logger.info(f"Request body: {body}")
 
     # 驗證簽名並處理請求
     try:
@@ -156,23 +155,18 @@ def handle_text_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
     user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
-    room_id = f"{details['room_id']}"
     
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為text)
     message_id = event.message.id          # 使用者的訊息ID
     user_message = event.message.text      # 使用者的訊息文字
 
     app.logger.info(f"完整 Event 內容: {event}")
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Text: {user_message}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | Text: {user_message}")
 
     reply_text = (
         f"LINEBot 收到文字\n"
-        #### 暫時保留以下兩行以備不時之需
-        #### f"  --User ID: {user_id}\n"
-        #### f"  --Group ID: {group_id}\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --文字訊息: {user_message}"
     )
@@ -186,13 +180,12 @@ def handle_image_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
     user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
-    room_id = f"{details['room_id']}"
     
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為image)
     message_id = event.message.id          # 使用者的訊息ID
 
     app.logger.info(f"完整 Event 內容: {event}")
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id}")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info}")
 
     # 建立下載目錄
     download_dir = "downloads"
@@ -229,7 +222,6 @@ def handle_image_message(event):
         f"LINEBot 收到圖片\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --檔名：圖檔無檔名資訊\n"
         f"  --大小：圖檔無大小資訊"
@@ -258,7 +250,6 @@ def handle_file_message(event):
     details = get_source_info(event)   # 呼叫Helper小幫手抓出使用者資訊
     user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
-    room_id = f"{details['room_id']}"
     
     user_message_type = event.message.type # 使用者的訊息型態 (此處應為file)
     message_id = event.message.id          # 使用者的訊息ID
@@ -266,7 +257,7 @@ def handle_file_message(event):
     file_size = event.message.file_size    # 檔案Size
 
     app.logger.info(f"完整 Event 內容: {event}")
-    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | RoomID: {room_id} | Name: {file_name} ({file_size} bytes)")
+    app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | Name: {file_name} ({file_size} bytes)")
 
     # 建立下載目錄並儲存從 LINE 取得的檔案
     download_dir = "downloads"
@@ -292,7 +283,6 @@ def handle_file_message(event):
         f"LINEBot 收到檔案\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --檔名：{file_name}\n"
         f"  --大小：{file_size} bytes\n"
@@ -309,7 +299,6 @@ def handle_sticker_message(event):
     details = get_source_info(event)
     user_info  = f"{details['user_name']} ({details['user_id']})" if details['user_name'] else details['user_id']
     group_info = f"{details['group_name']} ({details['group_id']})" if details['group_name'] else (details['group_id'] or "None")
-    room_id = f"{details['room_id']}"
     
     user_message_type = event.message.type
     message_id = event.message.id
@@ -365,7 +354,6 @@ def handle_sticker_message(event):
         f"LINEBot 收到貼圖\n"
         f"  --User Info ：{user_info}\n"
         f"  --Group Info：{group_info}\n"
-        f"  --Room ID: {room_id}\n"
         f"  --Message ID: {message_id}\n"
         f"  --Package ID: {package_id}\n"
         f"  --Sticker ID: {sticker_id}\n"
@@ -393,4 +381,4 @@ def handle_sticker_message(event):
 
 # 應用程序入口點(僅在用 `python3 app.py` 直接啟動時生效)
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True)
