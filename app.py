@@ -392,5 +392,5 @@ def handle_sticker_message(event):
 
 
 # 應用程序入口點(僅在用 `python3 app.py` 直接啟動時生效)
-# if __name__ == "__main__":
-#    app.run(host='0.0.0.0', debug=True)
+if __name__ == "__main__":
+   app.run(host='0.0.0.0', debug=True)
