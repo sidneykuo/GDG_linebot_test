@@ -3,9 +3,10 @@ import logging
 import io
 import requests  # 引入 requests 用於下載 LINE CDN 的貼圖圖片
 
-from dotenv import load_dotenv
-from flask  import Flask, request, abort, send_from_directory
-from PIL    import Image
+from dotenv       import load_dotenv
+from flask        import Flask, request, abort, send_from_directory
+from PIL          import Image
+from urllib.parse import quote  # 引入quote處理檔名 (若要回覆訊息提供下載檔案url，空白需要加工處理)
 
 # 引入 LINE SDK v3 的模組                  
 from linebot.v3.webhook    import WebhookHandler
@@ -260,10 +261,13 @@ def handle_file_message(event):
         content = blob_api.get_message_content(message_id)
         with open(save_path, "wb") as f:
             f.write(content)
+            
+    # 對 URL 中的檔名進行轉義處理（將空格轉為 %20 等 URL 安全字元）
+    encoded_filename = quote(saved_filename)
 
     # 生成 Render 上的公開存取網址 (自動偵測當前功能網域並補上 HTTPS)
     base_url = request.host_url.replace("http://", "https://")
-    file_url = f"{base_url}{FILE_STORAGE_FOLDER}/{saved_filename}"
+    file_url = f"{base_url}{FILE_STORAGE_FOLDER}/{encoded_filename}"
 
     # 組裝原本要回覆的文字訊息，並附上下載網址
     reply_text = (
