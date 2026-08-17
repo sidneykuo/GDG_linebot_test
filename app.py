@@ -276,7 +276,7 @@ def handle_file_message(event):
         f"  --檔案下載網址：\n{file_url}"
     )
 
-     app.logger.info(f"reply_text: {reply_text}")
+    app.logger.info(f"reply_text: {reply_text}")
     
     # 回覆給發送者/群組
     reply_text_message(event.reply_token, reply_text)
