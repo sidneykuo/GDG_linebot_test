@@ -230,18 +230,13 @@ def handle_image_message(event):
     )
 
     # 回覆「說明文字」與「圖片訊息 (ImageMessage)」給發送者/群組
-    reply_messages(
-                                               
-                                   
-                                
+    reply_messages(                 
         event.reply_token,
         [
             TextMessage(text=reply_text),
             ImageMessage(
                 original_content_url=image_url, # 原圖網址
                 preview_image_url=image_url     # 預覽圖網址
-                     
-                 
             )
         ]
     )
@@ -363,18 +358,13 @@ def handle_sticker_message(event):
     )
     
     # 回覆「說明文字」與下載下來的「貼圖圖片 (ImageMessage)」給發送者/群組
-    reply_messages(
-                                               
-                                   
-                                
+    reply_messages(                    
         event.reply_token,
         [
             TextMessage(text=reply_text),
             ImageMessage(
                 original_content_url=image_url, # 原圖網址
-                preview_image_url=image_url     # 預覽圖網址
-                     
-                 
+                preview_image_url=image_url     # 預覽圖網址   
             )
         ]
     )
