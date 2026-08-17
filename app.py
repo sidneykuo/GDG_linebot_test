@@ -50,10 +50,10 @@ app.logger.setLevel(logging.INFO)
 # app.logger.info(f"After logging level settiing")
 
 
-# ==================== 全域下載目錄設定 ====================
-DOWNLOAD_DIR = os.path.join(app.root_path, 'downloads')
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 自動確保 downloads 目錄存在，存在則不重複建立
-# ========================================================
+# ==================== 全域檔案目錄設定 ====================
+FILE_STORAGE_FOLDER='downloads'
+FILE_PATH = os.path.join(app.root_path, {FILE_STORAGE_FOLDER})
+os.makedirs(FILE_PATH, exist_ok=True)  # 自動確保 {FILE_STORAGE_FOLDER} 目錄存在，存在則不重複建立
 
 
 # 在所有 Request 進來時先執行的 Hook 函式
@@ -61,15 +61,6 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)  # 自動確保 downloads 目錄存在�
 def log_incoming_request():
     # 若此處夠清楚，下列幾行獨立的 logger.info 應該可以移掉
     app.logger.info(f"📥 [{request.method}] {request.path} | Remote IP: {request.remote_addr}")
-
-    # 暫時保留
-    # 取得請求的方法 (GET/POST) 與 請求路徑 (例如 / 或 /downloads/xxx)
-    # app.logger.info("\n" + "="*50)
-    # app.logger.info(f"📥 收到新的 HTTP Request!")
-    # app.logger.info(f"   -- 方法: {request.method}")
-    # app.logger.info(f"   -- 路徑: {request.path}")
-    # app.logger.info(f"   -- 來源 IP: {request.remote_addr}")
-    # app.logger.info("="*50 + "\n")
 
 
 # ==================== Helper 小幫手函式 -- BEGIN ====================
@@ -147,9 +138,7 @@ def callback():
 
 
 # 提供儲存檔案對外公開下載的靜態檔案路由
-@app.route('/downloads/<filename>', methods=['GET'])
-def download_file(filename):
-    return send_from_directory(DOWNLOAD_DIR, filename)
+@app.route('/{FILE_STORAGE_FOLDER}/<filename>', methods=['GET'])
 
 
 
@@ -194,7 +183,7 @@ def handle_image_message(event):
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info}")
 
     saved_filename = f"{message_id}.jpg"
-    save_path = os.path.join(DOWNLOAD_DIR, saved_filename)
+    save_path = os.path.join(FILE_PATH, saved_filename)
 
     # 載圖片並利用 Pillow 轉檔為標準 JPEG 格式 (相容 BMP, GIF, PNG, JPG)
     with ApiClient(configuration) as api_client:
@@ -216,7 +205,7 @@ def handle_image_message(event):
 
     # 產生公開存取的 HTTPS 圖檔網址
     base_url = request.host_url.replace("http://", "https://")
-    image_url = f"{base_url}{DOWNLOAD_DIR}/{saved_filename}"
+    image_url = f"{base_url}{FILE_STORAGE_FOLDER}/{saved_filename}"
 
     # 組裝資訊文字
     reply_text = (
@@ -262,7 +251,7 @@ def handle_file_message(event):
 
     # 用 message_id 作為檔名前綴，避免同名檔案覆蓋問題
     saved_filename = f"{message_id}_{file_name}"
-    save_path = os.path.join(DOWNLOAD_DIR, saved_filename)
+    save_path = os.path.join(FILE_PATH, saved_filename)
 
     with ApiClient(configuration) as api_client:
         blob_api = MessagingApiBlob(api_client)
@@ -272,7 +261,7 @@ def handle_file_message(event):
 
     # 生成 Render 上的公開存取網址 (自動偵測當前功能網域並補上 HTTPS)
     base_url = request.host_url.replace("http://", "https://")
-    file_url = f"{base_url}{DOWNLOAD_DIR}/{saved_filename}"
+    file_url = f"{base_url}{FILE_STORAGE_FOLDER}/{saved_filename}"
 
     # 組裝原本要回覆的文字訊息，並附上下載網址
     reply_text = (
@@ -308,7 +297,7 @@ def handle_sticker_message(event):
 
     # 用 message_id 與 sticker_id 作為檔名，並統一轉檔存成 JPG
     saved_filename = f"{message_id}_{sticker_id}.jpg"
-    save_path = os.path.join(DOWNLOAD_DIR, saved_filename)
+    save_path = os.path.join(FILE_PATH, saved_filename)
 
     # 從 LINE 官方 CDN 下載貼圖圖片（預設為 PNG 格式）
     cdn_sticker_url = f"https://stickershop.line-scdn.net/stickershop/v1/sticker/{sticker_id}/android/sticker.png"
@@ -335,7 +324,7 @@ def handle_sticker_message(event):
 
     # 產生 Render 上公開存取的 HTTPS 圖檔網址
     base_url = request.host_url.replace("http://", "https://")
-    image_url = f"{base_url}{DOWNLOAD_DIR}/{saved_filename}"
+    image_url = f"{base_url}{FILE_STORAGE_FOLDER}/{saved_filename}"
     
     app.logger.info(f"完整 Event 內容: {event}")
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | StickerID: {sticker_id} | PackageID: {package_id}")
