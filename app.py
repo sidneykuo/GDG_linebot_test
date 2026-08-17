@@ -105,16 +105,25 @@ def get_source_info(event):
         "group_name": group_name,
     }
 
-def reply_text_message(event_reply_token: str, text: str):
-    """統一封裝回覆訊息邏輯，避免程式碼重複"""
+def reply_messages(event_reply_token: str, messages):
+    """統一封裝回覆訊息邏輯，支援單一訊息物件或訊息物件清單 (list)"""
+    if not isinstance(messages, list):
+        messages = [messages]
+
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         line_bot_api.reply_message(
             ReplyMessageRequest(
                 reply_token=event_reply_token,
-                messages=[TextMessage(text=text)]
+                messages=messages
             )
         )
+
+def get_message_blob_content(message_id: str) -> bytes:
+    """統一封裝下載 Messaging Blob (圖片/檔案) 二進位內容"""
+    with ApiClient(configuration) as api_client:
+        blob_api = MessagingApiBlob(api_client)
+        return blob_api.get_message_content(message_id)
 # ==================== Helper 小幫手函式 -- END ====================
 
 
@@ -169,7 +178,7 @@ def handle_text_message(event):
         f"  --文字訊息: {user_message}"
     )
     
-    reply_text_message(event.reply_token, reply_text)
+    reply_messages(event.reply_token, TextMessage(text=reply_text))
 
 
 # Handler_2. 處理圖片訊息 (自動轉檔為 JPG 以相容所有圖片格式)
@@ -189,22 +198,22 @@ def handle_image_message(event):
     save_path = os.path.join(FILE_PATH, saved_filename)
 
     # 載圖片並利用 Pillow 轉檔為標準 JPEG 格式 (相容 BMP, GIF, PNG, JPG)
-    with ApiClient(configuration) as api_client:
-        blob_api = MessagingApiBlob(api_client)
-        content = blob_api.get_message_content(message_id)
-        
-        try:
-            # 用 Pillow 開啟記憶體中的二進位圖片
-            image = Image.open(io.BytesIO(content))
-            # 若為 RGBA (例如透明 PNG) 或 P 模式 (例如 GIF/BMP)，先轉為 RGB 才能存成 JPG
-            if image.mode in ("RGBA", "P"):
-                image = image.convert("RGB")
-            # 統一儲存為 JPEG 格式
-            image.save(save_path, "JPEG")
-        except Exception as e:
-            app.logger.error(f"圖片轉檔失敗，改直接寫入原檔: {e}")
-            with open(save_path, "wb") as f:
-                f.write(content)
+                                                
+                                               
+    content = get_message_blob_content(message_id)
+    
+    try:
+        # 用 Pillow 開啟記憶體中的二進位圖片
+        image = Image.open(io.BytesIO(content))
+        # 若為 RGBA (例如透明 PNG) 或 P 模式 (例如 GIF/BMP)，先轉為 RGB 才能存成 JPG
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+        # 統一儲存為 JPEG 格式
+        image.save(save_path, "JPEG")
+    except Exception as e:
+        app.logger.error(f"圖片轉檔失敗，改直接寫入原檔: {e}")
+        with open(save_path, "wb") as f:
+            f.write(content)
 
     # 產生公開存取的 HTTPS 圖檔網址
     base_url = request.host_url.replace("http://", "https://")
@@ -221,20 +230,21 @@ def handle_image_message(event):
     )
 
     # 回覆「說明文字」與「圖片訊息 (ImageMessage)」給發送者/群組
-    with ApiClient(configuration) as api_client:
-        line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[
-                    TextMessage(text=reply_text),
-                    ImageMessage(
-                        original_content_url=image_url, # 原圖網址
-                        preview_image_url=image_url     # 預覽圖網址
-                    )
-                ]
+    reply_messages(
+                                               
+                                   
+                                
+        event.reply_token,
+        [
+            TextMessage(text=reply_text),
+            ImageMessage(
+                original_content_url=image_url, # 原圖網址
+                preview_image_url=image_url     # 預覽圖網址
+                     
+                 
             )
-        )
+        ]
+    )
 
 
 # Handler_3. 處理檔案訊息 (儲存檔案並回傳公開下載網址)
@@ -256,11 +266,11 @@ def handle_file_message(event):
     saved_filename = f"{message_id}_{file_name}"
     save_path = os.path.join(FILE_PATH, saved_filename)
 
-    with ApiClient(configuration) as api_client:
-        blob_api = MessagingApiBlob(api_client)
-        content = blob_api.get_message_content(message_id)
-        with open(save_path, "wb") as f:
-            f.write(content)
+                                                
+                                               
+    content = get_message_blob_content(message_id)
+    with open(save_path, "wb") as f:
+        f.write(content)
             
     # 對 URL 中的檔名進行轉義處理（將空格轉為 %20 等 URL 安全字元）
     encoded_filename = quote(saved_filename)
@@ -281,7 +291,7 @@ def handle_file_message(event):
     )
     
     # 回覆給發送者/群組
-    reply_text_message(event.reply_token, reply_text)
+    reply_messages(event.reply_token, TextMessage(text=reply_text))
 
 
 # Handler_4. 處理貼圖訊息
@@ -349,20 +359,21 @@ def handle_sticker_message(event):
     )
     
     # 回覆「說明文字」與下載下來的「貼圖圖片 (ImageMessage)」給發送者/群組
-    with ApiClient(configuration) as api_client:
-        line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[
-                    TextMessage(text=reply_text),
-                    ImageMessage(
-                        original_content_url=image_url, # 原圖網址
-                        preview_image_url=image_url     # 預覽圖網址
-                    )
-                ]
+    reply_messages(
+                                               
+                                   
+                                
+        event.reply_token,
+        [
+            TextMessage(text=reply_text),
+            ImageMessage(
+                original_content_url=image_url, # 原圖網址
+                preview_image_url=image_url     # 預覽圖網址
+                     
+                 
             )
-        )
+        ]
+    )
 
 
 # 應用程序入口點(僅在用 `python3 app.py` 直接啟動時生效)
