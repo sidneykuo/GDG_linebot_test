@@ -51,7 +51,7 @@ app.logger.setLevel(logging.INFO)
 
 
 # ==================== 全域檔案目錄設定 ====================
-FILE_STORAGE_FOLDER='downloads'
+FILE_STORAGE_FOLDER="downloads"
 FILE_PATH = os.path.join(app.root_path, {FILE_STORAGE_FOLDER})
 os.makedirs(FILE_PATH, exist_ok=True)  # 自動確保 {FILE_STORAGE_FOLDER} 目錄存在，存在則不重複建立
 
