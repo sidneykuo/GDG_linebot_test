@@ -52,8 +52,8 @@ app.logger.setLevel(logging.INFO)
 
 # ==================== 全域檔案目錄設定 ====================
 FILE_STORAGE_FOLDER="downloads"
-FILE_PATH = os.path.join(app.root_path, {FILE_STORAGE_FOLDER})
-os.makedirs(FILE_PATH, exist_ok=True)  # 自動確保 {FILE_STORAGE_FOLDER} 目錄存在，存在則不重複建立
+FILE_PATH = os.path.join(app.root_path, FILE_STORAGE_FOLDER)
+os.makedirs(FILE_PATH, exist_ok=True)  # 自動確保 FILE_STORAGE_FOLDER 目錄存在，存在則不重複建立
 
 
 # 在所有 Request 進來時先執行的 Hook 函式
@@ -138,7 +138,10 @@ def callback():
 
 
 # 提供儲存檔案對外公開下載的靜態檔案路由
-@app.route('/{FILE_STORAGE_FOLDER}/<filename>', methods=['GET'])
+@app.route(f'/{FILE_STORAGE_FOLDER}/<filename>', methods=['GET'])
+# 感覺沒用，先mark起來
+# def download_file(filename):
+#     return send_from_directory(FILE_PATH, filename)
 
 
 
