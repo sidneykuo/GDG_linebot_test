@@ -139,9 +139,8 @@ def callback():
 
 # 提供儲存檔案對外公開下載的靜態檔案路由
 @app.route(f'/{FILE_STORAGE_FOLDER}/<filename>', methods=['GET'])
-# 感覺沒用，先mark起來
-# def download_file(filename):
-#     return send_from_directory(FILE_PATH, filename)
+def download_file(filename):
+    return send_from_directory(FILE_PATH, filename)
 
 
 
