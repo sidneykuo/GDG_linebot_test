@@ -318,7 +318,7 @@ def handle_sticker_message(event):
     cdn_sticker_url = f"https://stickershop.line-scdn.net/stickershop/v1/sticker/{sticker_id}/android/sticker.png"
     
     try:
-        response = requests.get(cdn_sticker_url)
+        response = requests.get(cdn_sticker_url, timeout=5)
         if response.status_code == 200:
             # 用 Pillow 開啟 PNG 圖片
             image = Image.open(io.BytesIO(response.content))
