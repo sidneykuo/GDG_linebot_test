@@ -7,7 +7,6 @@ from dotenv         import load_dotenv
 from flask          import Flask, request, abort, send_from_directory
 from PIL            import Image
 from urllib.parse   import quote            # 引入quote處理檔名 (若要回覆訊息提供下載檔案url，空白需要加工處理)
-from werkzeug.utils import secure_filename  # 引入安全檔名的library
 
 # 引入 LINE SDK v3 的模組                  
 from linebot.v3.webhook    import WebhookHandler
@@ -264,7 +263,7 @@ def handle_file_message(event):
     app.logger.info(f"MsgType: {user_message_type} | MsgID: {message_id} | UsrInfo: {user_info} | GrpInfo: {group_info} | Name: {file_name} ({file_size} bytes)")
 
     # 淨化使用者傳進來的檔名
-    safe_file_name = secure_filename(file_name)
+    safe_file_name = os.path.basename(file_name) # 強制忽略前面的路徑斜線
     # 如果檔名全是中文或特殊符號，被淨化後可能會變成空字元，需給予預設檔名
     if not safe_file_name:
         safe_file_name = "file"
